@@ -15,6 +15,72 @@ def makeDatabases(databases):
         conn.close()
 
 
+def addDatabase(databases):
+    databaseName = input("Enter a database name without .db: ").strip()
+
+    if not databaseName.replace("_", "").isalnum():
+        print("Use letters, numbers and underscores.")
+        return
+
+    if databaseName in databases:
+        print("That database is already in the list.")
+        return
+
+    try:
+        createTable(databaseName)
+    except sqlite3.Error as error:
+        print(f"Could not create the database: {error}")
+        return
+
+    databases.append(databaseName)
+    print(f"Database {databaseName} created successfully!")
+
+
+def deleteDatabase(databaseName, databases):
+    if databaseName not in databases:
+        print("Please select a database first.")
+        return False
+
+    if len(databases) <= 3:
+        print(
+            "There isnt additional created databases, keeping the three example databases and continuing."
+        )
+        return False
+
+    databaseFile = Path(f"{databaseName}.db")
+
+    print(
+        f"\nWARNING: You are deleting the ENTIRE database: {databaseName}\n"
+        f"File: {databaseFile.resolve()}\n"
+        "Every table and item inside it will be deleted.\n"
+        "This program cannot undo the deletion.\n"
+    )
+
+    confirmation = input("Type DELETE to continue: ")
+
+    if confirmation != "DELETE":
+        print("Deletion cancelled.")
+        return False
+
+    confirmation = input(
+        f"To confirm, type the database name exactly: {databaseName}\n> "
+    )
+
+    if confirmation != databaseName:
+        print("The name did not match. Deletion cancelled.")
+        return False
+
+    try:
+        databaseFile.unlink()
+    except OSError as error:
+        print(f"Could not delete the database: {error}")
+        return False
+
+    databases.remove(databaseName)
+    print(f"Database {databaseName} permanently deleted.")
+    return True
+
+
 def createTable(database):
     conn = connectToDatabase(database)
     cursor = conn.cursor()

@@ -8,17 +8,19 @@ def userMenu(selectedDatabase):
         "3. Add data\n"
         "4. Edit data\n"
         "5. Delete data\n"
+        "6. Create database\n"
+        "7. Delete database\n"
         "0. Exit\n"
     )
 
     while True:
         try:
-            choice = int(input("\nPlease select a number and press enter: "))
+            choice = int(input("\n\nPlease select a number and press enter: "))
 
-            if choice in (0, 1, 2, 3, 4, 5):
+            if choice in (0, 1, 2, 3, 4, 5, 6, 7):
                 return choice
 
-            print("Please choose a number between 0 and 5.")
+            print("Please choose a number between 0 and 7.")
 
         except ValueError:
             print("Please enter a whole number.")

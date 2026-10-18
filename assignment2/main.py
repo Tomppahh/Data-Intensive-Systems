@@ -31,6 +31,13 @@ def main():
             selectedDatabase = menu.selectDatabase(databases)
             print(f"Selected database: {selectedDatabase}")
 
+        elif choice == 6:
+            database.addDatabase(databases)
+
+        elif choice == 7:
+            if database.deleteDatabase(selectedDatabase, databases):
+                selectedDatabase = None
+
         elif selectedDatabase is None:
             print("Please select a database first.")
 
