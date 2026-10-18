@@ -162,3 +162,61 @@ def deleteData(database):
 
     finally:
         conn.close()
+
+
+def editData(database):
+    if not viewData(database):
+        return
+
+    try:
+        itemId = int(input("Enter the ID of the item to edit: "))
+    except ValueError:
+        print("Please enter a whole number.")
+        return
+
+    conn = connectToDatabase(database)
+
+    try:
+        item = conn.execute(
+            "SELECT name, quantity FROM products WHERE id = ?",
+            (itemId,),
+        ).fetchone()
+
+        if item is None:
+            print("No item found with that ID.")
+            return
+
+        nameData = input(f"New name [{item[0]}]: ").strip()
+
+        if not nameData:
+            nameData = item[0]
+
+        quantityInput = input(f"New quantity [{item[1]}]: ").strip()
+
+        if quantityInput:
+            try:
+                quantityData = int(quantityInput)
+            except ValueError:
+                print("Please enter a whole number.")
+                return
+
+            if quantityData < 0:
+                print("The quantity cannot be negative.")
+                return
+        else:
+            quantityData = item[1]
+
+        conn.execute(
+            "UPDATE products SET name = ?, quantity = ? WHERE id = ?",
+            (nameData, quantityData, itemId),
+        )
+
+        conn.commit()
+        print(f"Item {itemId} updated in {database}.")
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()

@@ -18,12 +18,33 @@ def main():
         if count == 0:
             database.loadDataFromFile(fileNameForData, databaseName)
 
+    selectedDatabase = None
+
     while True:
-        choice = menu.userMenu()
+        choice = menu.userMenu(selectedDatabase)
 
         if choice == 0:
             print("Thank you for using the program. The program will now close.")
             break
+
+        elif choice == 1:
+            selectedDatabase = menu.selectDatabase(databases)
+            print(f"Selected database: {selectedDatabase}")
+
+        elif selectedDatabase is None:
+            print("Please select a database first.")
+
+        elif choice == 2:
+            database.viewData(selectedDatabase)
+
+        elif choice == 3:
+            database.insertData(selectedDatabase)
+
+        elif choice == 4:
+            database.editData(selectedDatabase)
+
+        elif choice == 5:
+            database.deleteData(selectedDatabase)
 
 
 if __name__ == "__main__":
