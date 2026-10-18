@@ -54,3 +54,111 @@ def loadDataFromFile(filename, database):
 
     finally:
         conn.close()
+
+
+def insertData(database):
+    nameData = input("Please enter the item name: ").strip()
+
+    if not nameData:
+        print("The name cannot be empty.")
+        return
+
+    try:
+        quantityData = int(input("Please enter the quantity: "))
+
+        if quantityData < 0:
+            print("The quantity cannot be negative.")
+            return
+
+    except ValueError:
+        print("Please enter a whole number.")
+        return
+
+    conn = connectToDatabase(database)
+
+    try:
+        conn.execute(
+            "INSERT INTO products (name, quantity) VALUES (?, ?)",
+            (nameData, quantityData),
+        )
+
+        conn.commit()
+        print(f"Item added to {database}.")
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
+
+
+def viewData(database):
+    conn = connectToDatabase(database)
+
+    try:
+        items = conn.execute(
+            "SELECT id, name, quantity FROM products ORDER BY id"
+        ).fetchall()
+
+        if not items:
+            print("The database is empty.")
+            return False
+
+        print(f"\nItems in {database}:")
+        print(f"{'ID':<6}{'Name':<30}{'Quantity':>10}")
+        print("-" * 46)
+
+        for itemId, name, quantity in items:
+            print(f"{itemId:<6}{name:<30}{quantity:>10}")
+
+        return True
+
+    finally:
+        conn.close()
+
+
+def deleteData(database):
+    if not viewData(database):
+        return
+    try:
+        itemId = int(input("Enter the ID of the item to delete: "))
+    except ValueError:
+        print("Please enter a whole number.")
+        return
+
+    conn = connectToDatabase(database)
+
+    try:
+        item = conn.execute(
+            "SELECT name, quantity FROM products WHERE id = ?",
+            (itemId,),
+        ).fetchone()
+
+        if item is None:
+            print("No item found with that ID.")
+            return
+
+        confirmation = input(
+            f"Delete {item[0]} with quantity {item[1]} "
+            f"from {database}? Type YES to confirm: "
+        )
+
+        if confirmation != "YES":
+            print("Deletion cancelled.")
+            return
+
+        conn.execute(
+            "DELETE FROM products WHERE id = ?",
+            (itemId,),
+        )
+
+        conn.commit()
+        print(f"Item {itemId} deleted from {database}.")
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
