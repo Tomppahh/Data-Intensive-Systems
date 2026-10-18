@@ -1,5 +1,6 @@
+import csv
 import sqlite3
-from pathlib import pathlib
+from pathlib import Path
 
 # TODO: ability to delete database? This might not be needed and if made, it needs to be a "ARE YOU COMPLETELY SURE?" type of check for the user
 
@@ -82,7 +83,28 @@ def createTable(database):
 
 
 def loadDataFromFile(filename, database):
-    filePath = Path(filename)
+    filePath = Path(__file__).parent / filename
+    conn = connectToDatabase(database)
+
+    try:
+        with open(filePath, newline="", encoding="utf-8") as file:
+            rows = csv.DictReader(file)
+
+            for row in rows:
+                conn.execute(
+                    "INSERT INTO products (name, quantity) VALUES (?, ?)",
+                    (row["name"], int(row["quantity"])),
+                )
+
+        conn.commit()
+        print(f"Data loaded into {database}.")
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
 
 
 if __name__ == "__main__":
